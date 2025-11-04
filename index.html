@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent AHT Tracker</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Supabase JS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+</head>
+<body>
+    <!-- Toast Notification Container -->
+    <div id="toast-container"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <h1 class="app-title">📞 Agent AHT Tracker</h1>
+        </div>
+        <div class="header-right">
+            <!-- Navigation button (visible only when logged in) -->
+            <button id="aht-nav-btn" class="nav-btn hidden">AHT</button>
+            
+            <!-- Theme Toggle -->
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+                <span class="theme-icon">🌙</span>
+            </button>
+            
+            <!-- Login/Logout Buttons -->
+            <button id="login-btn" class="auth-btn">Login</button>
+            <button id="logout-btn" class="auth-btn hidden">Logout</button>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        
+        <!-- Login Required Screen -->
+        <div id="login-screen" class="login-screen">
+            <div class="login-card">
+                <div class="login-icon">🔒</div>
+                <h2>Please Login to Continue</h2>
+                <p>Access your AHT tracking dashboard by logging in</p>
+                
+                <!-- Supabase Login Form -->
+                <form id="demo-login-form" class="login-form">
+                    <div class="form-group">
+                        <label for="username">Email</label>
+                        <input type="email" id="username" class="form-input" placeholder="Enter your email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" class="form-input" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary login-submit-btn">🔓 Login</button>
+                </form>
+                <p class="demo-hint" style="display:none;">Supabase auth active</p>
+            </div>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboard" class="dashboard hidden">
+            
+            <!-- AHT Input Section -->
+            <section class="card input-section">
+                <h2 class="section-title">📝 Enter Today's Data</h2>
+                <p class="input-hint">Format: Total Calls 85 Total Talk Time 05:35:37</p>
+                
+                <textarea 
+                    id="data-input" 
+                    class="data-textarea" 
+                    placeholder="Total Calls 85 Total Talk Time 05:35:37"
+                    rows="3"
+                ></textarea>
+                
+                <div class="button-group">
+                    <button id="save-data-btn" class="btn btn-primary">💾 Save Data</button>
+                    <button id="back-btn" class="btn btn-secondary">← Back</button>
+                </div>
+            </section>
+
+            <!-- Summary Section -->
+            <section class="card summary-section">
+                <h2 class="section-title">📊 AHT Summary</h2>
+                <div class="summary-grid">
+                    <div class="summary-card">
+                        <div class="summary-label">Today's AHT</div>
+                        <div id="today-aht" class="summary-value">—</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-label">Till Now AHT</div>
+                        <div id="overall-aht" class="summary-value">—</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Daily Records Section -->
+            <section class="card records-section">
+                <h2 class="section-title">📅 Daily Records</h2>
+                <div id="records-list" class="records-list">
+                    <p class="empty-state">No records yet. Add your first entry above!</p>
+                </div>
+            </section>
+
+            <!-- Delete Data Section -->
+            <section class="card delete-section">
+                <h2 class="section-title">🗑️ Delete Data</h2>
+                <div class="delete-controls">
+                    <label for="delete-date-picker" class="delete-label">Select Date:</label>
+                    <input type="date" id="delete-date-picker" class="date-picker">
+                    
+                    <div class="button-group">
+                        <button id="delete-single-btn" class="btn btn-danger">Delete Selected Date</button>
+                        <button id="delete-till-btn" class="btn btn-warning">Delete Till Selected Date</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>CREATED BY SHIVANG | AHT Tracker v1.0</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
