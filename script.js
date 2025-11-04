@@ -2,6 +2,7 @@
 const supabaseUrl = 'https://amsrxpzwgjleqebacgpl.supabase.co'; //
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFtc3J4cHp3Z2psZXFlYmFjZ3BsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE3NDQ1MDcsImV4cCI6MjA2NzMyMDUwN30.rka0TwVVu2virQPNThD5q4uBxVwQjjBUp5Odzag2JYc'; //
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
 /* ---------- Application State ---------- */
 let appState = {
     isLoggedIn: false,
@@ -9,7 +10,7 @@ let appState = {
     user: null
 };
 
-/* ---------- DOM Elements ---------- */
+/* ---------- DOM Elements (MODIFIED) ---------- */
 const loginBtn = document.getElementById('login-btn');
 const logoutBtn = document.getElementById('logout-btn');
 const demoLoginForm = document.getElementById('demo-login-form'); // reused for email/password form
@@ -28,6 +29,13 @@ const recordsList = document.getElementById('records-list');
 const deleteDatePicker = document.getElementById('delete-date-picker');
 const deleteSingleBtn = document.getElementById('delete-single-btn');
 const deleteTillBtn = document.getElementById('delete-till-btn');
+
+// ADDED THESE
+const overallTotalCallsDisplay = document.getElementById('overall-total-calls');
+const overallTotalTalkTimeDisplay = document.getElementById('overall-total-talk-time');
+// ADDED NEW CARD DISPLAY
+const avgCallsDisplay = document.getElementById('avg-calls');
+
 
 /* ---------- Initialization ---------- */
 document.addEventListener('DOMContentLoaded', () => {
@@ -132,7 +140,7 @@ logoutBtn.addEventListener('click', async () => {
     }
 });
 
-/* ---------- UI Update ---------- */
+/* ---------- UI Update (MODIFIED) ---------- */
 function updateUI() {
     if (appState.isLoggedIn) {
         loginScreen.classList.add('hidden');
@@ -152,18 +160,66 @@ function updateUI() {
 
         todayAhtDisplay.textContent = '—';
         overallAhtDisplay.textContent = '—';
+        
+        // ADDED RESET LOGIC FOR NEW CARDS
+        if (overallTotalCallsDisplay) overallTotalCallsDisplay.textContent = '—';
+        if (overallTotalTalkTimeDisplay) overallTotalTalkTimeDisplay.textContent = '—';
+        // ADDED RESET FOR NEW CARD
+        if (avgCallsDisplay) avgCallsDisplay.textContent = '—';
+        
         recordsList.innerHTML = '<p class="empty-state">Please login to see records</p>';
     }
 }
 
-/* ---------- Summary & Records UI ---------- */
+/* ---------- Summary & Records UI (MODIFIED) ---------- */
 function updateSummary() {
     const today = getTodayDate();
     const todayRecord = appState.ahtRecords.find(record => record.date === today);
 
+    // Update Today's AHT
     todayAhtDisplay.textContent = todayRecord ? todayRecord.aht : '—';
-    const overallAht = calculateOverallAHT();
+    
+    // Calculate overall stats
+    if (appState.ahtRecords.length === 0) {
+        // Reset all overall fields if no records
+        overallAhtDisplay.textContent = '—';
+        overallTotalCallsDisplay.textContent = '—';
+        overallTotalTalkTimeDisplay.textContent = '—';
+        // ADDED RESET FOR NEW CARD
+        avgCallsDisplay.textContent = '—';
+        return;
+    }
+
+    let totalCalls = 0;
+    let totalTalkTimeSeconds = 0;
+    appState.ahtRecords.forEach(record => {
+        totalCalls += record.total_calls;
+        totalTalkTimeSeconds += record.total_talk_time_seconds;
+    });
+
+    // Update Overall AHT (using existing function)
+    const overallAht = calculateAHT(totalTalkTimeSeconds, totalCalls);
     overallAhtDisplay.textContent = overallAht || '—';
+
+    // Update new cards
+    overallTotalCallsDisplay.textContent = totalCalls;
+    overallTotalTalkTimeDisplay.textContent = formatSecondsToTime(totalTalkTimeSeconds);
+
+    // ========================================
+    //   ADDED LOGIC FOR NEW CARD
+    // ========================================
+    const totalRecords = appState.ahtRecords.length;
+    let avgCalls = 0;
+    if (totalRecords > 0) {
+        // round to 1 decimal place
+        avgCalls = (totalCalls / totalRecords).toFixed(1);
+    }
+    
+    // Update new card display
+    avgCallsDisplay.textContent = avgCalls === 0 ? '—' : avgCalls;
+    // ========================================
+    //   END OF ADDED LOGIC
+    // ========================================
 }
 
 function updateRecordsList() {
@@ -340,7 +396,7 @@ deleteSingleBtn.addEventListener('click', async () => {
 
         showToast('Record deleted successfully', 'success');
         await loadRecordsFromSupabase();
-    } catch (err) {
+    } catch (err) { // <-- FIXED: Added curly braces
         console.error('Delete exception', err);
         showToast('Error deleting record', 'error');
     }
@@ -390,23 +446,51 @@ backBtn.addEventListener('click', () => {
     }
 });
 
-/* ---------- THEME ---------- */
+/* ---------- THEME (UPDATED) ---------- */
 function initializeTheme() {
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
     updateThemeIcon(savedTheme);
 }
+
+// UPDATED event listener for smooth animation
 themeToggle.addEventListener('click', () => {
-    const current = document.documentElement.getAttribute('data-theme');
+    const icon = themeToggle.querySelector('.theme-icon');
+    const current = document.documentElement.getAttribute('data-theme') || 'light';
     const next = current === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', next);
-    localStorage.setItem('theme', next);
-    updateThemeIcon(next);
+
+    // 1. Add fade-out animation class
+    if (icon) {
+        icon.classList.add('fade-out');
+    }
+
+    // 2. Wait for animation to almost finish (500ms)
+    setTimeout(() => {
+        // 3. Switch the data-theme attribute
+        document.documentElement.setAttribute('data-theme', next);
+        
+        // 4. Update the icon text
+        updateThemeIcon(next); 
+        
+        // 5. Save the new theme to local storage
+        localStorage.setItem('theme', next);
+
+        // 6. Remove the class to allow the new icon to fade/rotate in
+        if (icon) {
+            // Short delay to ensure browser registers the text change
+            setTimeout(() => icon.classList.remove('fade-out'), 50); 
+        }
+    }, 500); // This duration should be slightly less than the CSS transition
 });
+
+// UPDATED icon logic to match request (🌙 for dark, 🌞 for light)
 function updateThemeIcon(theme) {
     const icon = themeToggle.querySelector('.theme-icon');
-    if (icon) icon.textContent = theme === 'dark' ? '☀️' : '🌙';
+    if (icon) {
+        icon.textContent = theme === 'dark' ? '🌙' : '🌞';
+    }
 }
+
 
 /* ---------- TOAST ---------- */
 function showToast(message, type = 'info') {
@@ -434,3 +518,4 @@ function getTodayDate() {
 }
 
 /* ---------- End of script ---------- */
+
