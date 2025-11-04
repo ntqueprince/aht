@@ -15,6 +15,28 @@
     --border-color: #e5e7eb; /* Softer border */
     --shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Softer shadow */
     --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.08); /* Softer, deeper shadow */
+
+    /* NEW: Summary Card Gradients */
+    --grad-blue-start: #4A90E2;
+    --grad-blue-end: #357ABD;
+    --grad-purple-start: #9B59B6;
+    --grad-purple-end: #8E44AD;
+    --grad-green-start: #2ECC71;
+    --grad-green-end: #27AE60;
+    --grad-orange-start: #F39C12;
+    --grad-orange-end: #E67E22;
+    /* ADDED: New card color */
+    --grad-red-start: #E74C3C;
+    --grad-red-end: #C0392B;
+
+    /* NEW: Summary Card Glows */
+    --glow-blue: 0 0 18px rgba(74, 144, 226, 0.5);
+    --glow-purple: 0 0 18px rgba(155, 89, 182, 0.5);
+    --glow-green: 0 0 18px rgba(46, 204, 113, 0.5);
+    --glow-orange: 0 0 18px rgba(243, 156, 18, 0.5);
+    /* ADDED: New card glow */
+    --glow-red: 0 0 18px rgba(231, 76, 60, 0.5);
+
     --btn-primary-bg: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
     --btn-primary-hover: linear-gradient(135deg, #4f4fe2 0%, #623cdc 100%);
     --btn-secondary-bg: #f3f4f6; /* Lighter secondary */
@@ -57,12 +79,50 @@
     --input-bg: #121826;
     --input-border: #374151;
 
+    /* NEW: Summary Card Gradients (Dark) */
+    --grad-blue-start: #357ABD;
+    --grad-blue-end: #2a6da8;
+    --grad-purple-start: #8E44AD;
+    --grad-purple-end: #7d3a9b;
+    --grad-green-start: #27AE60;
+    --grad-green-end: #219d55;
+    --grad-orange-start: #E67E22;
+    --grad-orange-end: #d35400;
+    /* ADDED: New card color (Dark) */
+    --grad-red-start: #C0392B;
+    --grad-red-end: #a53125;
+
+    /* NEW: Summary Card Glows (Dark) */
+    --glow-blue: 0 0 18px rgba(74, 144, 226, 0.4);
+    --glow-purple: 0 0 18px rgba(155, 89, 182, 0.4);
+    --glow-green: 0 0 18px rgba(46, 204, 113, 0.4);
+    --glow-orange: 0 0 18px rgba(243, 156, 18, 0.4);
+    /* ADDED: New card glow (Dark) */
+    --glow-red: 0 0 18px rgba(231, 76, 60, 0.4);
+
     /* Dark Glows */
     --glow-primary: 0 0 15px rgba(116, 74, 252, 0.3);
     --glow-success: 0 0 12px rgba(52, 211, 153, 0.3);
     --glow-error: 0 0 12px rgba(247, 92, 92, 0.3);
     --glow-info: 0 0 12px rgba(59, 130, 246, 0.3);
 }
+
+/* ========================================
+   SMOOTH THEME TRANSITIONS (ADDED)
+   ======================================== */
+.card, .login-card, .form-input, .data-textarea, .btn-secondary, 
+.record-item, .toast, .footer, .date-picker, .empty-state, 
+.input-bg, .nav-btn, .auth-btn, .record-item:hover,
+.btn-secondary:hover {
+    /* Apply smooth transition to all theme-affected properties */
+    transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease;
+}
+
+/* Header needs special handling for gradient background */
+.header {
+    transition: background 0.5s ease, box-shadow 0.3s ease;
+}
+
 
 /* ========================================
    GLOBAL STYLES
@@ -81,7 +141,8 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    /* UPDATED transition time for theme switch */
+    transition: background-color 0.5s ease, color 0.5s ease;
     /* Better font rendering */
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -134,6 +195,7 @@ body {
     box-shadow: 0 0 10px rgba(255,255,255,0.2); /* Added glow */
 }
 
+/* UPDATED theme toggle styles */
 .theme-toggle {
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.3);
@@ -146,13 +208,32 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
+    /* UPDATED transition for smoother hover */
+    transition: all 0.5s ease;
+    overflow: hidden; /* Hide icon parts during rotation */
 }
 
+/* UPDATED hover for glow and scale */
 .theme-toggle:hover {
     background: rgba(255, 255, 255, 0.2);
-    transform: rotate(20deg) scale(1.1); /* More playful hover */
+    transform: scale(1.15); /* Slight scale */
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.3); /* Hover glow */
 }
+
+/* ADDED styles for the icon animation */
+.theme-icon {
+    display: inline-block; /* Needed for transform */
+    transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55), opacity 0.5s ease;
+    transform: rotate(0deg) scale(1);
+    opacity: 1;
+}
+
+/* ADDED animation class for JS */
+.theme-icon.fade-out {
+    transform: rotate(360deg) scale(0);
+    opacity: 0;
+}
+
 
 .auth-btn {
     background: white;
@@ -397,28 +478,75 @@ body {
 }
 
 /* ========================================
-   SUMMARY SECTION
+   SUMMARY SECTION (MODIFIED)
    ======================================== */
 .summary-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    /* MODIFIED: Use auto-fit with a slightly larger min */
+    /* This will responsively create a 1, 2, or 3 column layout */
+    /* On large desktops (1200px), it will fit 3, making the 5 cards 3x2 */
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 1.5rem;
 }
 
 .summary-card {
-    background: var(--btn-primary-bg);
+    /* MODIFIED: Removed generic background */
     padding: 1.5rem;
-    border-radius: 12px;
+    border-radius: 16px; /* MODIFIED: Increased rounding */
     text-align: center;
     color: white;
-    box-shadow: var(--shadow), var(--glow-primary); /* Add glow */
+    box-shadow: var(--shadow); /* MODIFIED: Removed generic glow */
     transition: all 0.3s ease;
 }
 
 .summary-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg), var(--glow-primary);
+    transform: translateY(-5px); /* MODIFIED: Increased lift */
+    /* Glow effect is now specific to each card type */
+    box-shadow: var(--shadow-lg); 
 }
+
+/* NEW: Specific Summary Card Styles */
+.summary-card-blue {
+    background: linear-gradient(135deg, var(--grad-blue-start) 0%, var(--grad-blue-end) 100%);
+    box-shadow: var(--shadow), var(--glow-blue);
+}
+.summary-card-blue:hover {
+    box-shadow: var(--shadow-lg), var(--glow-blue);
+}
+
+.summary-card-purple {
+    background: linear-gradient(135deg, var(--grad-purple-start) 0%, var(--grad-purple-end) 100%);
+    box-shadow: var(--shadow), var(--glow-purple);
+}
+.summary-card-purple:hover {
+    box-shadow: var(--shadow-lg), var(--glow-purple);
+}
+
+.summary-card-green {
+    background: linear-gradient(135deg, var(--grad-green-start) 0%, var(--grad-green-end) 100%);
+    box-shadow: var(--shadow), var(--glow-green);
+}
+.summary-card-green:hover {
+    box-shadow: var(--shadow-lg), var(--glow-green);
+}
+
+.summary-card-orange {
+    background: linear-gradient(135deg, var(--grad-orange-start) 0%, var(--grad-orange-end) 100%);
+    box-shadow: var(--shadow), var(--glow-orange);
+}
+.summary-card-orange:hover {
+    box-shadow: var(--shadow-lg), var(--glow-orange);
+}
+
+/* ADDED: New card style */
+.summary-card-red {
+    background: linear-gradient(135deg, var(--grad-red-start) 0%, var(--grad-red-end) 100%);
+    box-shadow: var(--shadow), var(--glow-red);
+}
+.summary-card-red:hover {
+    box-shadow: var(--shadow-lg), var(--glow-red);
+}
+
 
 .summary-label {
     font-size: 0.9rem;
