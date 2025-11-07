@@ -241,7 +241,7 @@ function updateRecordsList() {
 /* ---------- PARSING & CALCULATION ---------- */
 function parseInputData(inputText) {
     const trimmedInput = inputText.trim();
-    const regex = /Total Calls\s+(\d+)\s+Total Talk Time\s+(\d{1,2}):(\d{2}):(\d{2})/i;
+const regex = /Total Calls\s*(\d+)\s*Total Talk Time\s*(\d{1,2}):(\d{2}):(\d{2})/i;
     const match = trimmedInput.match(regex);
     if (!match) return null;
 
@@ -518,4 +518,3 @@ function getTodayDate() {
 }
 
 /* ---------- End of script ---------- */
-
